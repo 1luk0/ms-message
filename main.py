@@ -11,7 +11,7 @@ load_dotenv()
 app= Flask(__name__)
 
 def send_email(subject, email, body):
-    #variables env 
+    #variables .env 
     email_sender=os.getenv("GoogleMail__Emailsender")
     email_password=os.getenv("GoogleMail__ApiKey") 
     smtp_server=os.getenv("GoogleMail__Host")
@@ -26,22 +26,29 @@ def send_email(subject, email, body):
     #cuerpo
     msg.attach(MIMEText(body, 'html'))
 
+    #intentamos enviar el correo
     try:
         with smtplib.SMTP(smtp_server, int(smpt_port)) as server:
             server.starttls()
+            #enviamos la autentificacion
             server.login(email_sender, email_password)
+            #enviamos el email
             server.sendmail(email_sender,email, msg.as_string())
         return True
     except Exception as e:
+        #devolvemos la exepcion 
         return False ,str(e)
     
+#endpoint
 @app.route('/send-email', methods=['POST'])
 def send_email_endponit():
     data= request.json
+    #obtenemos las variables
     subject= data.get('subject')
     recipient= data.get('recipient')
     body_html= data.get('body_html')
 
+    #guardamos el estado que genra el envio de la request 
     succes= send_email(subject, recipient, body_html)
     print(succes)
     if succes:
